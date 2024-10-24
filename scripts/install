@@ -4,17 +4,12 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# APP "BUILD" (DEPLOYING SOURCES, VENV, COMPILING ETC)
-#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression "Setting up source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir"
 
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:$app "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
 ynh_nodejs_install
 
 #=================================================
@@ -22,10 +17,9 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Adding system configurations related to $app..."
 
-# Create a dedicated NGINX config using the conf/nginx.conf template
 ynh_config_add_nginx
 
-# Create a dedicated systemd config
+
 ynh_config_add --template="crabfit.target" --destination="/etc/systemd/system/$app.target"
 ynh_config_add_systemd --service="${app}-front" --template="crabfit-front.service"
 ynh_config_add_systemd --service="${app}-back" --template="crabfit-back.service"
@@ -43,12 +37,8 @@ ynh_script_progression "Adding configuration files..."
 # Replace the default .env.local with our own
 rm $install_dir/frontend/.env.local
 ynh_config_add --template="front.env" --destination="$install_dir/frontend/.env.local"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/frontend/.env.local"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app:$app "$install_dir/frontend/.env.local"
 
 ynh_config_add --template="back.env" --destination="$install_dir/api/.env"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/api/.env"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app:$app "$install_dir/api/.env"
 
 #=================================================
 # BUILD BACKEND
@@ -69,11 +59,11 @@ build_frontend
 #=================================================
 ynh_script_progression "Starting systemd services..."
 
-# Start a systemd service
 ynh_systemctl --service="${app}-front" --action="start" --log_path="/var/log/$app/${app}-front.log"
 ynh_systemctl --service="${app}-back" --action="start" --log_path="/var/log/$app/${app}-back.log"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
+
 ynh_script_progression "Installation of $app completed"

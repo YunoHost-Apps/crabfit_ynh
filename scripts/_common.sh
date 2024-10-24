@@ -4,7 +4,7 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
-export nodejs_version="18"
+nodejs_version="18"
 
 function build_backend
 {

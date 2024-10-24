@@ -12,17 +12,12 @@ ynh_systemctl --service="${app}-front" --action="stop" --log_path="/var/log/$app
 ynh_systemctl --service="${app}-back" --action="stop" --log_path="/var/log/$app/${app}-back"
 
 #=================================================
-# "REBUILD" THE APP (DEPLOY NEW SOURCES, RERUN NPM BUILD...)
-#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression "Upgrading source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir"
 
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:$app "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
 ynh_nodejs_install
 
 #=================================================
@@ -30,10 +25,9 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Upgrading system configurations related to $app..."
 
-# Create a dedicated NGINX config using the conf/nginx.conf template
 ynh_config_add_nginx
 
-# Create a dedicated systemd config
+
 ynh_config_add --template="crabfit.target" --destination="/etc/systemd/system/$app.target"
 ynh_config_add_systemd --service="${app}-front" --template="crabfit-front.service"
 ynh_config_add_systemd --service="${app}-back" --template="crabfit-back.service"
@@ -44,8 +38,6 @@ yunohost service add "${app}-back" --description="Crabfit Rust Backend" --log="/
 ynh_config_add_logrotate
 
 #=================================================
-# RECONFIGURE THE APP (UPDATE CONF, APPLY MIGRATIONS...)
-#=================================================
 # UPDATE A CONFIG FILE
 #=================================================
 ynh_script_progression "Updating configuration..."
@@ -53,17 +45,14 @@ ynh_script_progression "Updating configuration..."
 # Replace the default .env.local with our own
 rm $install_dir/frontend/.env.local
 ynh_config_add --template="front.env" --destination="$install_dir/frontend/.env.local"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/frontend/.env.local"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app:$app "$install_dir/frontend/.env.local"
 
 ynh_config_add --template="back.env" --destination="$install_dir/api/.env"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/api/.env"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app:$app "$install_dir/api/.env"
 
 #=================================================
 # BUILD BACKEND
 #=================================================
 ynh_script_progression "Building crabfit backend..."
+
 build_backend
 
 #=================================================
