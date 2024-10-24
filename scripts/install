@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -14,76 +8,72 @@ source /usr/share/yunohost/helpers
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Setting up source files..." --weight=1
+ynh_script_progression "Setting up source files..."
 
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir"
 
-chown -R $app:$app "$install_dir"
-chmod -R o-rwx "$install_dir"
-
-ynh_install_nodejs --nodejs_version=$nodejs_version
-ynh_use_nodejs
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:$app "$install_dir"
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
+ynh_nodejs_install
 
 #=================================================
 # SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+ynh_script_progression "Adding system configurations related to $app..."
 
 # Create a dedicated NGINX config using the conf/nginx.conf template
-ynh_add_nginx_config
+ynh_config_add_nginx
 
 # Create a dedicated systemd config
-ynh_add_config --template="../conf/crabfit.target" --destination="/etc/systemd/system/$app.target"
-ynh_add_systemd_config --service="${app}-front" --template="crabfit-front.service"
-ynh_add_systemd_config --service="${app}-back" --template="crabfit-back.service"
+ynh_config_add --template="crabfit.target" --destination="/etc/systemd/system/$app.target"
+ynh_config_add_systemd --service="${app}-front" --template="crabfit-front.service"
+ynh_config_add_systemd --service="${app}-back" --template="crabfit-back.service"
 
 yunohost service add "${app}-front" --description="Crabfit NodeJS Frontend" --log="/var/log/$app/${app}-front.log"
 yunohost service add "${app}-back" --description="Crabfit Rust Backend" --log="/var/log/$app/${app}-back.log"
 
-ynh_use_logrotate
+ynh_config_add_logrotate
 
 #=================================================
 # ADD CONFIGURATIONS
 #=================================================
-ynh_script_progression --message="Adding configuration files..." --weight=1
+ynh_script_progression "Adding configuration files..."
 
 # Replace the default .env.local with our own
 rm $install_dir/frontend/.env.local
-ynh_add_config --template="front.env" --destination="$install_dir/frontend/.env.local"
-chmod 400 "$install_dir/frontend/.env.local"
-chown $app:$app "$install_dir/frontend/.env.local"
+ynh_config_add --template="front.env" --destination="$install_dir/frontend/.env.local"
+#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/frontend/.env.local"
+#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app:$app "$install_dir/frontend/.env.local"
 
-ynh_add_config --template="back.env" --destination="$install_dir/api/.env"
-chmod 400 "$install_dir/api/.env"
-chown $app:$app "$install_dir/api/.env"
+ynh_config_add --template="back.env" --destination="$install_dir/api/.env"
+#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/api/.env"
+#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app:$app "$install_dir/api/.env"
 
 #=================================================
 # BUILD BACKEND
 #=================================================
-ynh_script_progression --message="Building crabfit backend..." --weight=10
+ynh_script_progression "Building crabfit backend..."
 
 build_backend
 
 #=================================================
 # BUILD FRONTEND
 #=================================================
-ynh_script_progression --message="Building crabfit frontend..." --weight=2
+ynh_script_progression "Building crabfit frontend..."
 
 build_frontend
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting systemd services..." --weight=1
+ynh_script_progression "Starting systemd services..."
 
 # Start a systemd service
-ynh_systemd_action --service_name="${app}-front" --action="start" --log_path="/var/log/$app/${app}-front.log"
-ynh_systemd_action --service_name="${app}-back" --action="start" --log_path="/var/log/$app/${app}-back.log"
+ynh_systemctl --service="${app}-front" --action="start" --log_path="/var/log/$app/${app}-front.log"
+ynh_systemctl --service="${app}-back" --action="start" --log_path="/var/log/$app/${app}-back.log"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression "Installation of $app completed"

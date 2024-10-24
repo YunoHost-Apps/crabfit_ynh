@@ -10,9 +10,9 @@ Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/frontend
 StandardOutput=append:/var/log/__APP__/__APP__-front.log
 StandardError=inherit
-Environment=__YNH_NODE_LOAD_PATH__
+Environment=PATH=__PATH_WITH_NODEJS__
 Environment=PORT=__PORT__
-ExecStart=__YNH_NPM__ run start
+ExecStart=__NODEJS_DIR__/npm run start
 
 # Sandboxing options to harden security
 # Depending on specificities of your service/app, you may need to tweak these
