@@ -36,7 +36,7 @@ ynh_add_config --template="../conf/back.env" --destination="$install_dir/api/.en
 
 # Next.js copies some env values inside the
 # production build so we have to rebuild it
-ynh_use_nodejs
+#REMOVEME? ynh_use_nodejs
 build_frontend
 
 #=================================================

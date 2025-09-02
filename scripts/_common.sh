@@ -4,7 +4,7 @@
 # COMMON VARIABLES
 #=================================================
 
-export nodejs_version="18"
+export #REMOVEME? nodejs_version="18"
 
 #=================================================
 # PERSONAL HELPERS

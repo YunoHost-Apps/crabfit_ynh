@@ -22,8 +22,8 @@ ynh_setup_source --dest_dir="$install_dir"
 chown -R $app:$app "$install_dir"
 chmod -R o-rwx "$install_dir"
 
-ynh_install_nodejs --nodejs_version=$nodejs_version
-ynh_use_nodejs
+#REMOVEME? ynh_install_nodejs --#REMOVEME? nodejs_version=$nodejs_version
+#REMOVEME? ynh_use_nodejs
 
 #=================================================
 # SYSTEM CONFIGURATION
