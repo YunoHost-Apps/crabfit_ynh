@@ -34,7 +34,6 @@ function build_backend
 
 function build_frontend
 {
-	
 	pushd $install_dir/frontend
 		ynh_hide_warnings ynh_exec_as_app npm install next
 		ynh_hide_warnings ynh_exec_as_app npm run build

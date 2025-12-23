@@ -12,8 +12,6 @@ ynh_systemctl --service="${app}-front" --action="stop" --log_path="/var/log/$app
 ynh_systemctl --service="${app}-back" --action="stop" --log_path="/var/log/$app/${app}-back"
 
 #=================================================
-# "REBUILD" THE APP (DEPLOY NEW SOURCES, RERUN NPM BUILD...)
-#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression "Upgrading source files..."
@@ -39,8 +37,6 @@ yunohost service add "${app}-back" --description="Crabfit Rust Backend" --log="/
 
 ynh_config_add_logrotate
 
-#=================================================
-# RECONFIGURE THE APP (UPDATE CONF, APPLY MIGRATIONS...)
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
